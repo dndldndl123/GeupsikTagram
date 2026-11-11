@@ -1,0 +1,526 @@
+<Window x:Class="중간프로젝트_클라이언트.NutritionistWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="급식타그램 - 영양사"
+        Width="1180" Height="860"
+        MinWidth="960" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Malgun Gothic">
+
+    <!-- ===== 공통 하늘색 파스텔 배경 ===== -->
+    <Window.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#CFEBFF" Offset="0"/>
+            <GradientStop Color="#EEF8FF" Offset="0.45"/>
+            <GradientStop Color="#F6FBF4" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Accent"      Color="#3B9BEA"/>
+        <SolidColorBrush x:Key="AccentDark"  Color="#2B84CF"/>
+        <SolidColorBrush x:Key="AccentLight" Color="#E1F1FD"/>
+        <SolidColorBrush x:Key="TextMain"    Color="#22252E"/>
+        <SolidColorBrush x:Key="TextSub"     Color="#5F7A93"/>
+        <SolidColorBrush x:Key="LineBrush"   Color="#DCE8F3"/>
+        <SolidColorBrush x:Key="Heart"       Color="#E5484D"/>
+        <SolidColorBrush x:Key="HeartLight"  Color="#FDECEC"/>
+
+        <DropShadowEffect x:Key="CardShadow" Color="#3B9BEA" BlurRadius="22" ShadowDepth="3" Opacity="0.10"/>
+
+        <!-- 큰 카드 -->
+        <Style x:Key="PanelCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="18,16,10,10"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+        </Style>
+
+        <!-- 요약 숫자 카드 -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+        </Style>
+
+        <!-- 이전/다음 달 -->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="White" BorderBrush="{StaticResource LineBrush}"
+                                BorderThickness="1" CornerRadius="19">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentLight}"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 끼니 필터 (전체/조식/중식/석식) -->
+        <Style x:Key="FilterTabStyle" TargetType="RadioButton">
+            <Setter Property="GroupName" Value="MealFilter"/>
+            <Setter Property="Width" Value="76"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSub}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="bd" Background="Transparent" CornerRadius="8" Margin="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#F0F7FD"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource Accent}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 작은 글자 버튼 (전체 보기 / 새로고침) -->
+        <Style x:Key="LinkButtonStyle" TargetType="Button">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{StaticResource AccentLight}" CornerRadius="10" Padding="10,4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#CFE6FB"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 코멘트 삭제 ✕ 버튼 -->
+        <Style x:Key="DeleteButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#A9BCCD"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTip" Value="코멘트 삭제"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="Transparent" CornerRadius="13">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource HeartLight}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Heart}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 순위 목록 한 줄 (선택 가능) -->
+        <Style x:Key="RankingItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="bd" Margin="0,0,0,6" Padding="12,10"
+                                Background="#F7FBFF" BorderBrush="Transparent" BorderThickness="1.5"
+                                CornerRadius="12">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#EEF6FE"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentLight}"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 순위 한 줄 내용 -->
+        <DataTemplate x:Key="RankingTemplate">
+            <DockPanel>
+                <!-- 순위 동그라미 -->
+                <Border x:Name="rankBadge" DockPanel.Dock="Left"
+                        Width="34" Height="34" CornerRadius="17"
+                        Background="#EEF2F7" VerticalAlignment="Center">
+                    <TextBlock x:Name="rankText" Text="{Binding Rank}"
+                               FontSize="14" FontWeight="Black" Foreground="#7A8BA0"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- 좋아요 / 코멘트 수 -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="{StaticResource HeartLight}" CornerRadius="10" Padding="9,3">
+                        <TextBlock Text="{Binding LikeCount, StringFormat='♥ {0}'}"
+                                   FontSize="12" FontWeight="Bold" Foreground="{StaticResource Heart}"/>
+                    </Border>
+                    <Border Background="#EEF4FA" CornerRadius="10" Padding="9,3" Margin="6,0,0,0">
+                        <TextBlock Text="{Binding CommentCount, StringFormat='💬 {0}'}"
+                                   FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSub}"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- 날짜 · 끼니 / 메뉴 요약 -->
+                <StackPanel Margin="12,0,10,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding DateText}" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMain}"/>
+                        <TextBlock Text="{Binding MealTag}" FontSize="12" Margin="8,0,0,0"
+                                   Foreground="{StaticResource TextSub}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding MenuSummary}" FontSize="12" Margin="0,3,0,0"
+                               Foreground="#8CA0B5" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </DockPanel>
+
+            <DataTemplate.Triggers>
+                <!-- 1·2·3위 메달 색 -->
+                <DataTrigger Binding="{Binding Rank}" Value="1">
+                    <Setter TargetName="rankBadge" Property="Background" Value="#FFD66B"/>
+                    <Setter TargetName="rankText" Property="Foreground" Value="White"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Rank}" Value="2">
+                    <Setter TargetName="rankBadge" Property="Background" Value="#C9D2DE"/>
+                    <Setter TargetName="rankText" Property="Foreground" Value="White"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Rank}" Value="3">
+                    <Setter TargetName="rankBadge" Property="Background" Value="#E3AE85"/>
+                    <Setter TargetName="rankText" Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 코멘트 한 개 -->
+        <DataTemplate x:Key="CommentTemplate">
+            <Border Padding="2,12" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- 아바타 -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- 내용 -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- 삭제 버튼 -->
+                    </Grid.ColumnDefinitions>
+
+                    <Border x:Name="avatar" Width="36" Height="36" CornerRadius="18"
+                            Background="{StaticResource AccentLight}"
+                            VerticalAlignment="Top" Margin="0,0,12,0">
+                        <TextBlock x:Name="avatarText" Text="{Binding Initial}"
+                                   FontSize="14" FontWeight="Bold" Foreground="{StaticResource Accent}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1">
+                        <DockPanel>
+                            <!-- 어느 급식인지 + 그 급식 좋아요 -->
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Background="#F0F7FD" CornerRadius="8" Padding="8,2">
+                                    <TextBlock Text="{Binding MealTag}" FontSize="11"
+                                               Foreground="{StaticResource AccentDark}"/>
+                                </Border>
+                                <TextBlock Text="{Binding MealLikeCount, StringFormat='♥ {0}'}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="8,0,0,0"
+                                           Foreground="{StaticResource Heart}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Writer}" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextMain}" VerticalAlignment="Center"/>
+                                <Border x:Name="roleBadge" Margin="6,0,0,0" Padding="6,1" CornerRadius="6"
+                                        Background="#EEF4FA" VerticalAlignment="Center">
+                                    <TextBlock x:Name="roleText" Text="{Binding Role}" FontSize="10"
+                                               Foreground="{StaticResource TextSub}"/>
+                                </Border>
+                                <TextBlock Text="{Binding CreatedAtText}" FontSize="11" Margin="8,0,0,0"
+                                           Foreground="#A9BCCD" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <TextBlock Text="{Binding Content}" Margin="0,5,0,0"
+                                   FontSize="13" LineHeight="20" TextWrapping="Wrap"
+                                   Foreground="#3A4A5C"/>
+                    </StackPanel>
+
+                    <!-- 삭제 버튼 (ViewModel 의 DeleteCommentCommand 호출) -->
+                    <Button Grid.Column="2"
+                            Content="✕"
+                            Style="{StaticResource DeleteButtonStyle}"
+                            VerticalAlignment="Top"
+                            Margin="8,-2,0,0"
+                            Command="{Binding DataContext.DeleteCommentCommand,
+                                      RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}"/>
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Role}" Value="영양사">
+                    <Setter TargetName="roleBadge" Property="Background" Value="#DCFCE7"/>
+                    <Setter TargetName="roleText" Property="Foreground" Value="#15803D"/>
+                    <Setter TargetName="avatar" Property="Background" Value="#DCFCE7"/>
+                    <Setter TargetName="avatarText" Property="Foreground" Value="#15803D"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Role}" Value="학부모">
+                    <Setter TargetName="roleBadge" Property="Background" Value="#FEF3C7"/>
+                    <Setter TargetName="roleText" Property="Foreground" Value="#B45309"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- 빈 목록 안내 -->
+        <Style x:Key="EmptyText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#A9BCCD"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="28,20,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- 학교/이름 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 월 이동 + 필터 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 요약 -->
+            <RowDefinition Height="*"/>
+            <!-- 순위 + 코멘트 -->
+        </Grid.RowDefinitions>
+
+        <!-- ===== 1. 학교 / 이름 ===== -->
+        <DockPanel Grid.Row="0">
+            <!-- 로그아웃 (맨 오른쪽) -->
+            <Button DockPanel.Dock="Right" Content="로그아웃"
+                    Style="{StaticResource LinkButtonStyle}"
+                    Click="BtnLogout_Click"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"/>
+            <!-- 새로고침 (로그아웃 왼쪽) -->
+            <Button DockPanel.Dock="Right" Content="↻ 새로고침"
+                    Style="{StaticResource LinkButtonStyle}"
+                    Command="{Binding RefreshCommand}"
+                    VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="28" Height="28" CornerRadius="14" Background="#CCFFFFFF" Margin="0,0,10,0">
+                    <TextBlock Text="🧑‍🍳" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{Binding SchoolName, FallbackValue=가수원중학교}" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMain}"/>
+                    <TextBlock Text="{Binding UserName, FallbackValue=정영양 · 영양사}" FontSize="11"
+                               Foreground="{StaticResource TextSub}"/>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- ===== 2. 월 이동 + 끼니 필터 ===== -->
+        <Grid Grid.Row="1" Margin="0,14,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="급식 반응 대시보드" FontSize="18" FontWeight="Bold"
+                           Foreground="{StaticResource TextMain}"/>
+                <TextBlock Text="학생·학부모의 좋아요와 코멘트를 한눈에" FontSize="12" Margin="0,2,0,0"
+                           Foreground="{StaticResource TextSub}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource NavButtonStyle}" Content="◀" ToolTip="저번 달"
+                        Command="{Binding PrevMonthCommand}"/>
+                <TextBlock Text="{Binding CurrentMonthText, FallbackValue=2026년 11월}"
+                           MinWidth="170" TextAlignment="Center" VerticalAlignment="Center"
+                           Margin="14,0" FontSize="24" FontWeight="Bold"
+                           Foreground="{StaticResource TextMain}"/>
+                <Button Style="{StaticResource NavButtonStyle}" Content="▶" ToolTip="다음 달"
+                        Command="{Binding NextMonthCommand}"/>
+            </StackPanel>
+
+            <Border Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Background="White" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
+                    CornerRadius="10" Padding="2">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Style="{StaticResource FilterTabStyle}" Content="전체" IsChecked="True"
+                                 Command="{Binding ChangeMealFilterCommand}" CommandParameter="All"/>
+                    <RadioButton Style="{StaticResource FilterTabStyle}" Content="🌅 조식"
+                                 Command="{Binding ChangeMealFilterCommand}" CommandParameter="조식"/>
+                    <RadioButton Style="{StaticResource FilterTabStyle}" Content="☀️ 중식"
+                                 Command="{Binding ChangeMealFilterCommand}" CommandParameter="중식"/>
+                    <RadioButton Style="{StaticResource FilterTabStyle}" Content="🌙 석식"
+                                 Command="{Binding ChangeMealFilterCommand}" CommandParameter="석식"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===== 3. 요약 숫자 ===== -->
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="1.4*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="❤️ 이번 달 좋아요" FontSize="12" Foreground="{StaticResource TextSub}"/>
+                    <TextBlock Text="{Binding TotalLikes, FallbackValue=0}" FontSize="26" FontWeight="Bold"
+                               Foreground="{StaticResource Heart}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="💬 이번 달 코멘트" FontSize="12" Foreground="{StaticResource TextSub}"/>
+                    <TextBlock Text="{Binding TotalComments, FallbackValue=0}" FontSize="26" FontWeight="Bold"
+                               Foreground="{StaticResource AccentDark}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="4" Style="{StaticResource StatCard}">
+                <StackPanel>
+                    <TextBlock Text="🏆 가장 인기 있었던 급식" FontSize="12" Foreground="{StaticResource TextSub}"/>
+                    <TextBlock Text="{Binding TopMealText, FallbackValue=-}" FontSize="20" FontWeight="Bold"
+                               Foreground="#8A5A00" Margin="0,7,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===== 4. 순위 + 코멘트 ===== -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="1.15*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 왼쪽 : 좋아요 순위 -->
+            <Border Grid.Column="0" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="0,0,8,10">
+                        <TextBlock Text="❤️ 좋아요 순위" FontSize="15" FontWeight="Bold"
+                                   Foreground="{StaticResource TextMain}"/>
+                        <TextBlock Text="급식을 누르면 오른쪽에 그 급식 코멘트만 보여요" FontSize="11" Margin="0,3,0,0"
+                                   Foreground="{StaticResource TextSub}"/>
+                    </StackPanel>
+
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Rankings}"
+                             SelectedItem="{Binding SelectedRanking, Mode=TwoWay}"
+                             ItemTemplate="{StaticResource RankingTemplate}"
+                             ItemContainerStyle="{StaticResource RankingItemStyle}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Padding="0,0,6,0"/>
+
+                    <TextBlock Grid.Row="1" Text="이 달에는 급식 정보가 없어요">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource EmptyText}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasRankings}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- 오른쪽 : 코멘트 -->
+            <Border Grid.Column="2" Style="{StaticResource PanelCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Margin="0,0,8,6">
+                        <Button DockPanel.Dock="Right" Content="전체 보기"
+                                Style="{StaticResource LinkButtonStyle}"
+                                Command="{Binding ShowAllCommentsCommand}"
+                                VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding CommentsTitle, FallbackValue=💬 11월 전체 코멘트}"
+                                   FontSize="15" FontWeight="Bold"
+                                   Foreground="{StaticResource TextMain}" VerticalAlignment="Center"/>
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+                        <ItemsControl ItemsSource="{Binding Comments}"
+                                      ItemTemplate="{StaticResource CommentTemplate}"/>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasComments}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="🍽️" FontSize="34" HorizontalAlignment="Center"/>
+                        <TextBlock Text="아직 코멘트가 없어요" Style="{StaticResource EmptyText}" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,14 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# 빌드 결과물
+bin/
+obj/
+
+# NuGet 패키지 (Visual Studio가 자동으로 다시 받아옴)
+packages/
+
+# DB 비밀번호·API 키가 들어 있는 설정 파일 (appsettings.example.json 참고)
+중간프로젝트/중간프로젝트/appsettings.json

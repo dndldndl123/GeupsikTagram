@@ -1,0 +1,6 @@
+@중간프로젝트_HostAddress = http://localhost:5202
+
+GET {{중간프로젝트_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
